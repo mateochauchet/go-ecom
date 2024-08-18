@@ -1,0 +1,28 @@
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+*.bin
+
+# Environment variables
+.env
+
+# Vendor folder, if any
+/vendor/
+
+# Output of `go build` and `go test`
+/bin/
+/build/
+
+# Logs
+*.log
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
