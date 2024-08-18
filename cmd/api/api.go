@@ -27,7 +27,8 @@ func (s *APIServer) Run() error {
 
 	router.HandleFunc("/ping", handlePing).Methods("GET")
 
-	userHandler := user.NewHandler()
+	userStore := user.NewStore(s.db)
+	userHandler := user.NewHandler(userStore)
 	userHandler.RegisterRoutes(subrouter)
 
 	log.Println("Listening on port " + s.address)
