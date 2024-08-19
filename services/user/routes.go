@@ -5,11 +5,13 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/mateochauchet/go-ecom/services/auth"
 	"github.com/mateochauchet/go-ecom/types"
 	"github.com/mateochauchet/go-ecom/utils"
 )
 
 type Handler struct {
+	//user repository
 	store types.UserStore
 }
 
@@ -47,12 +49,19 @@ func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	hashedPassword, err := auth.HashPassword(payload.Password)
+
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
 	// create user
 	err = h.store.CreateUser(&types.User{
 		FirstName: payload.FirstName,
 		LastName:  payload.LastName,
 		Email:     payload.Email,
-		Password:  payload.Password,
+		Password:  hashedPassword,
 	})
 
 	if err != nil {
