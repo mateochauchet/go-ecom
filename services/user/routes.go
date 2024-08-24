@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"github.com/mateochauchet/go-ecom/services/auth"
 	"github.com/mateochauchet/go-ecom/types"
@@ -38,6 +39,15 @@ func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	// validate payload
+	err = utils.Validate.Struct(payload)
+
+	if err != nil {
+		errors := err.(validator.ValidationErrors)
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid payload: %v", errors))
 		return
 	}
 

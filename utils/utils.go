@@ -4,7 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/go-playground/validator/v10"
 )
+
+// this is for caching, using same instance of validator for all requests
+var Validate = validator.New()
 
 func ParseJson(r *http.Request, payloadVar any) error {
 	if r.Body == nil {
