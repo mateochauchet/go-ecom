@@ -94,5 +94,4 @@ func (s *Store) CreateUser(user *types.User) error {
 	}
 
 	return nil
-
 }

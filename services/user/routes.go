@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
+	"github.com/mateochauchet/go-ecom/config"
 	"github.com/mateochauchet/go-ecom/services/auth"
 	"github.com/mateochauchet/go-ecom/types"
 	"github.com/mateochauchet/go-ecom/utils"
@@ -28,7 +29,47 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 }
 
 func (h *Handler) handleLogin(w http.ResponseWriter, r *http.Request) {
-	println("login")
+	// get JSON payload
+	var payload types.LoginUserPayload
+
+	err := utils.ParseJson(r, &payload)
+
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	// validate payload
+	err = utils.Validate.Struct(payload)
+
+	if err != nil {
+		errors := err.(validator.ValidationErrors)
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid payload: %v", errors))
+		return
+	}
+
+	// check if user exists
+	user, err := h.store.GetUserByEmail(payload.Email)
+
+	if err != nil {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("Not found, invalid email"))
+		return
+	}
+
+	if !auth.ComparePassword(user.Password, []byte(payload.Password)) {
+		utils.WriteError(w, http.StatusBadRequest, fmt.Errorf("invalid email or password"))
+		return
+	}
+
+	// generate JWT
+	secret := []byte(config.Envs.JWTSecret)
+	token, err := auth.CreateJWT([]byte(secret), user.ID)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	utils.WriteJson(w, http.StatusOK, map[string]string{"token": token})
 }
 
 func (h *Handler) handleRegister(w http.ResponseWriter, r *http.Request) {
