@@ -27,6 +27,7 @@ func (s *APIServer) Run() error {
 
 	router.HandleFunc("/ping", handlePing).Methods("GET")
 
+	// Register user routes
 	userStore := user.NewStore(s.db)
 	userHandler := user.NewHandler(userStore)
 	userHandler.RegisterRoutes(subrouter)
